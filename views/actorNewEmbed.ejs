@@ -5,7 +5,7 @@
 <title>Creative Securities - Social pattern mapper</title>
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-  
+
 <style>
 #svg {
 	top: 250px;
@@ -73,7 +73,7 @@
   fill: #333;
   text-anchor: middle;
 }
-	
+
 .link path.curve {
   stroke: #999;
   fill: none;
@@ -87,9 +87,10 @@
 
 .graph .convex-hulls path {
   opacity: 0.1;
-  stroke-width: 100;
+  stroke-width: 120;
   fill: #888;
   stroke: #888;
+  stroke-linejoin: round;
 }
 
 
@@ -103,7 +104,7 @@ a:visited { color: #EE3124; }
 a:active { color: #EE3124; }
 </style>
 </head>
-	
+
 <body class="container">
   <main>
     <h1>Actor network map</h1>
@@ -146,7 +147,7 @@ a:active { color: #EE3124; }
 
   <script>
   var dataurl = "/actors/map/mapdata5/<%= workshop_id %>";
-  
+
   console.log("Setting DATA URL in page : " + dataurl);
   </script>
   <script src="/js/d3.v4.min.js"></script>

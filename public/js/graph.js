@@ -48,12 +48,12 @@ INITIALISATION
 ------------*/
 function initScales(graph) {
   var nodeMaxValue = d3.max(graph.nodes, function(d) {
-    return d.Scale;
+    return +d.Scale;
   });
   nodeScale.domain([0, nodeMaxValue]);
 
   var linkMaxValue = d3.max(graph.links, function(d) {
-    return d.value;
+    return +d.value;
   });
   linkWidthScale.domain([0, linkMaxValue])
   linkArrowScale.domain([0, linkMaxValue])
@@ -130,23 +130,23 @@ function constructLink(d) {
   d3.select(this)
     .append('path')
     .classed('curve', true)
-    .attr('stroke-width', function(d) { return linkWidthScale(d.value); });
+    .attr('stroke-width', function(d) { return linkWidthScale(+d.value); });
 
   // Add a line element to hold the arrow marker. (Couldn't figure out how to get marker-mid working on a quadratic bezier path.)
   d3.select(this)
     .append('line')
     .classed('arrow', true)
     .style('marker-start', 'url(#marker-arrow)')
-    .attr('stroke-width', function(d) { return linkArrowScale(d.value); });
+    .attr('stroke-width', function(d) { return linkArrowScale(+d.value); });
 }
 
 function constructNode(d, i) {
-  var l = nodeScale(d.Scale);
+  var l = nodeScale(+d.Scale);
   var strokeWidth = 2;
 
   d3.select(this)
     .append('circle')
-    .attr('r', nodeScale(d.Scale))
+    .attr('r', nodeScale(+d.Scale))
     .style('stroke-width', strokeWidth)
     .style('stroke', nodeColorScale(d.Class));
 
@@ -156,7 +156,7 @@ function constructNode(d, i) {
     .append('clipPath')
     .attr('id', 'node-clip-' + i)
     .append('circle')
-    .attr('r', nodeScale(d.Scale) - 0.5 * strokeWidth);
+    .attr('r', nodeScale(+d.Scale) - 0.5 * strokeWidth);
 
   if(d.image_url !== null) {
     var imageSize = l * 2;
