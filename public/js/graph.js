@@ -24,8 +24,18 @@ var drag = d3.drag()
     .on('drag', dragged)
     .on('end', dragended);
 
-var nodeScale = d3.scaleSqrt().range([20, 60]);
-var nodeColorScale = d3.scaleOrdinal().range(d3.schemeDark2);
+var nodeScale = d3.scaleSqrt().range([0, 60]);
+var linkWidthScale = d3.scaleLinear().range([0, 12]);
+var linkArrowScale = d3.scaleLinear().range([0.5, 3]);
+
+function nodeColorScale(c) {
+  var colors = {
+    'Actor' : '#ffff33',
+    'Infrastructure' : '#99cc00',
+    'Data': '#3399ff'
+  };
+  return colors[c] ? colors[c] : '#aaa';
+}
 
 var state = {
   hoveredNode: null
@@ -41,6 +51,12 @@ function initScales(graph) {
     return d.Scale;
   });
   nodeScale.domain([0, nodeMaxValue]);
+
+  var linkMaxValue = d3.max(graph.links, function(d) {
+    return d.value;
+  });
+  linkWidthScale.domain([0, linkMaxValue])
+  linkArrowScale.domain([0, linkMaxValue])
 }
 
 
@@ -48,37 +64,24 @@ function initScales(graph) {
 EVENTS
 --- */
 function handleNodeClick(d) {
-  d3.select('h1').html(d.Name); 
-  d3.select('h2').html ('Take me to ' + '<a href="/actors/' + d._id + '" target="_blank">'  + d.Name + ' web page ⇢'+ '</a>' ); 
+  d3.select('h1').html(d.Name);
+  d3.select('h2').html ('Take me to ' + '<a href="/actors/' + d._id + '" target="_blank">'  + d.Name + ' web page ⇢'+ '</a>' );
 }
 
 function handleNodeMouseenter(d) {
   d3.select(this)
-    .select('image')
-    .transition()
-    .attr('transform', 'scale(1.2)');
-
-  d3.select(this)
     .select('circle')
-    .attr('filter', 'url(#drop-shadow)')
-    .transition()
-    .attr('transform', 'scale(1.2)');
+    .attr('filter', 'url(#drop-shadow)');
 
   d3.select('#drop-shadow feGaussianBlur')
-    .transition()
-    .attr('stdDeviation', 3);
+    .attr('stdDeviation', 4);
 
   d3.select(this)
     .select('text')
-    .transition()
-    .attr('transform', 'scale(1.2)');
+    .style('font-weight', 'bold');
 }
 
 function handleNodeMouseleave(d) {
-  d3.select(this)
-    .select('image')
-    .attr('transform', null);
-
   d3.select(this)
     .select('circle')
     .attr('filter', null)
@@ -89,7 +92,7 @@ function handleNodeMouseleave(d) {
 
   d3.select(this)
     .select('text')
-    .attr('transform', null);
+    .style('font-weight', 'normal');
 
   state.hoveredNode = null;
   updateTooltip();
@@ -127,18 +130,19 @@ function constructLink(d) {
   d3.select(this)
     .append('path')
     .classed('curve', true)
-    .attr('stroke-width', function(d) { return Math.sqrt(d.value); });
+    .attr('stroke-width', function(d) { return linkWidthScale(d.value); });
 
   // Add a line element to hold the arrow marker. (Couldn't figure out how to get marker-mid working on a quadratic bezier path.)
   d3.select(this)
     .append('line')
     .classed('arrow', true)
-    .style('marker-start', 'url(#marker-arrow)');
+    .style('marker-start', 'url(#marker-arrow)')
+    .attr('stroke-width', function(d) { return linkArrowScale(d.value); });
 }
 
 function constructNode(d, i) {
   var l = nodeScale(d.Scale);
-  var strokeWidth = 4;
+  var strokeWidth = 2;
 
   d3.select(this)
     .append('circle')
@@ -170,9 +174,10 @@ function constructNode(d, i) {
     .append('text')
     .attr('class', 'nodetext')
     .attr('y', l + 15)
+    .style('font-size', '14px')
     .text(d.Name);
 
-  d3.select(this)    
+  d3.select(this)
     .on('click', handleNodeClick)
     .on('mouseenter', handleNodeMouseenter)
     .on('mousemove', handleNodeMousemove)
@@ -189,7 +194,7 @@ function constructGraph(graph) {
     .append('g')
     .classed('link', true)
     .each(constructLink);
-    
+
   nodeGroups = nodeGroups
     .data(graph.nodes)
     .enter()
@@ -273,7 +278,7 @@ function fitToWindow() {
 function ticked() {
   nodeGroups.attr('transform', function(d) {
 	  return 'translate(' + d.x + ',' + d.y + ')';
-  });	
+  });
 
   linkGroups
     .each(function(d) {
